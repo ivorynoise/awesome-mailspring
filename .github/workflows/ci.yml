@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # Figure out which plugins changed so we only build those. Falls back to
+  # building every plugin when there's no usable diff base (new branch,
+  # force push, first commit).
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      plugins: ${{ steps.changed.outputs.plugins }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: changed
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+          else
+            BASE="${{ github.event.before }}"
+          fi
+
+          if [[ -z "$BASE" || "$BASE" =~ ^0+$ ]] || ! git cat-file -e "$BASE" 2>/dev/null; then
+            CHANGED=$(ls plugins)
+          else
+            CHANGED=$(git diff --name-only "$BASE" "$GITHUB_SHA" -- plugins/ | cut -d/ -f2 | sort -u)
+          fi
+
+          # A deleted plugin shouldn't spawn a build job
+          PLUGINS=$(for p in $CHANGED; do [[ -d "plugins/$p" ]] && echo "$p"; done | jq -R . | jq -sc .)
+          echo "plugins=$PLUGINS" >> "$GITHUB_OUTPUT"
+          echo "Plugins to build: $PLUGINS"
+
+  build:
+    needs: detect
+    if: needs.detect.outputs.plugins != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        plugin: ${{ fromJSON(needs.detect.outputs.plugins) }}
+    name: build ${{ matrix.plugin }}
+    defaults:
+      run:
+        working-directory: plugins/${{ matrix.plugin }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: plugins/${{ matrix.plugin }}/package-lock.json
+
+      - run: npm ci
+
+      - run: npm run build

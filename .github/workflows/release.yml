@@ -1,0 +1,82 @@
+# Packages one plugin as an installable zip and attaches it to a GitHub
+# Release. Trigger by pushing a tag named <plugin-name>-v<version>, e.g.:
+#
+#   git tag hello-mailspring-v0.1.0 && git push origin hello-mailspring-v0.1.0
+#
+# The zip contains built lib/, styles/, package.json, and production
+# node_modules — everything Mailspring's "Install a Plugin..." needs, since
+# the app neither transpiles nor npm-installs plugins itself.
+name: Release
+
+on:
+  push:
+    tags:
+      - '*-v[0-9]*'
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parse tag
+        id: parse
+        shell: bash
+        run: |
+          TAG="$GITHUB_REF_NAME"
+          PLUGIN="${TAG%-v*}"
+          VERSION="${TAG##*-v}"
+
+          if [[ ! -d "plugins/$PLUGIN" ]]; then
+            echo "::error::No plugin directory: plugins/$PLUGIN (tag: $TAG)"
+            exit 1
+          fi
+
+          PKG_VERSION=$(jq -r .version "plugins/$PLUGIN/package.json")
+          if [[ "$PKG_VERSION" != "$VERSION" ]]; then
+            echo "::error::Tag says v$VERSION but plugins/$PLUGIN/package.json says $PKG_VERSION — bump package.json before tagging"
+            exit 1
+          fi
+
+          echo "plugin=$PLUGIN" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: plugins/${{ steps.parse.outputs.plugin }}/package-lock.json
+
+      - name: Build
+        working-directory: plugins/${{ steps.parse.outputs.plugin }}
+        run: |
+          npm ci
+          npm run build
+          npm prune --omit=dev
+
+      - name: Package
+        id: pack
+        shell: bash
+        run: |
+          PLUGIN="${{ steps.parse.outputs.plugin }}"
+          ZIP="$PLUGIN-v${{ steps.parse.outputs.version }}.zip"
+
+          # Ship only what Mailspring needs at runtime — drop sources and
+          # build config. The zip expands to a single <plugin-name>/ folder.
+          (cd plugins && zip -rq "$GITHUB_WORKSPACE/$ZIP" "$PLUGIN" \
+            -x "$PLUGIN/src/*" "$PLUGIN/types/*" "$PLUGIN/tsconfig.json")
+
+          echo "Contents:"
+          unzip -l "$ZIP"
+          echo "zip=$ZIP" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" "${{ steps.pack.outputs.zip }}" \
+            --title "${{ steps.parse.outputs.plugin }} v${{ steps.parse.outputs.version }}" \
+            --generate-notes
