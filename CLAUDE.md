@@ -74,6 +74,21 @@ from memory — verify in source, and extend the plugin's
   hand-maintained (originally from mailspring-mcp) — extend them when using
   new APIs rather than falling back to `any`.
 
+## Contribution workflow (issue-first, small, stacked PRs)
+
+Development here is a stream of small PRs, each fixing one bug or shipping
+one feature. Before raising any PR, invoke the `raise-pr` skill
+(`.claude/skills/raise-pr/SKILL.md`) and follow it. The short version:
+
+- **Issue first.** Every PR references a GitHub issue (`Closes #N` /
+  `Fixes #N`). Search existing issues; create one if none matches.
+- **Stacked PRs are preferred.** Work that builds on an unmerged PR branches
+  from that PR's branch and sets it as the PR base, so review never blocks on
+  a merge. After the base squash-merges, `git rebase --onto origin/main` and
+  force-push (with lease).
+- **Keep PRs small.** New concerns become follow-up stacked PRs, not extra
+  commits on an open one. `main` is protected (CODEOWNERS review required).
+
 ## Workflows
 
 - **New plugin**: copy `plugins/hello-mailspring`, rename (no spaces — plugin
