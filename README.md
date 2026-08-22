@@ -8,6 +8,13 @@ Mailspring's `packages` directory.
 
 - [Mailspring](https://getmailspring.com/) installed and signed in
 - Node.js (for `npm install` / `tsc`)
+- A clone of the original Mailspring source next to this repo — it's the
+  reference for every API a plugin touches (`app/src`,
+  `app/internal_packages`, `PLUGIN_SYSTEM_ARCHITECTURE.md`):
+
+  ```bash
+  git clone https://github.com/Foundry376/Mailspring.git ../Mailspring
+  ```
 
 ## Developing
 
@@ -116,9 +123,12 @@ them as needed.
   (`composer-translate`, `composer-templates`, `phishing-detection` are good
   starting points), and the official
   [Mailspring-Plugin-Starter](https://github.com/Foundry376/Mailspring-Plugin-Starter).
+  With the source cloned at `../Mailspring` (see Prerequisites) these are all
+  readable locally.
 
 ## Plugins
 
 | Plugin | Status | Description |
 |---|---|---|
 | `hello-mailspring` | template | Sender-domain color bar in the message sidebar (from the official guide) |
+| `advanced-filter` | working | Run an account's mail rules on any mailbox: adds a folder picker + "Process mailbox" button below Preferences → Mail Rules (defaults to All Mail, falls back to Inbox) |

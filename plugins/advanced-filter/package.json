@@ -1,0 +1,21 @@
+{
+  "name": "advanced-filter",
+  "version": "0.1.0",
+  "main": "./lib/main",
+  "description": "Run an account's mail rules on any mailbox — adds a folder picker and Process button below Preferences → Mail Rules (defaults to All Mail)",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "engines": {
+    "mailspring": ">=1.6.3"
+  },
+  "windowTypes": {
+    "default": true
+  },
+  "devDependencies": {
+    "@types/react": "17.0.2",
+    "typescript": "5.7.3"
+  }
+}

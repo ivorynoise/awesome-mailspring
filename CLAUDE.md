@@ -40,6 +40,21 @@ scripts/unlink.sh        removes that symlink
   which is more current than the Getting Started guide (the guide still shows
   the Nylas-era CoffeeScript template).
 
+## Mailspring reference source
+
+A full checkout of [Foundry376/Mailspring](https://github.com/Foundry376/Mailspring)
+is expected one directory up from this repo, at `../Mailspring` (relative to
+the main checkout — from a git worktree, resolve against the original repo
+root). **If it exists, use it** to answer any Mailspring API question — store
+methods, `mailspring-exports` members, model attributes, preferences tabs:
+grep/read `../Mailspring/app/src/**` and `../Mailspring/app/internal_packages/**`;
+the repo root also has `PLUGIN_SYSTEM_ARCHITECTURE.md`. Only fall back to
+extracting compiled JS from the installed app
+(`/Applications/Mailspring.app/Contents/Resources/app.asar`) when the checkout
+is missing, or to confirm the installed version matches it. Never guess an API
+from memory — verify in source, and extend the plugin's
+`types/mailspring-exports.d.ts` from what you find.
+
 ## Mailspring rules (violations fail silently at runtime)
 
 - **Import `React`/`PropTypes` from `'mailspring-exports'`, never `'react'`.**

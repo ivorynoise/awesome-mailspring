@@ -1,0 +1,41 @@
+// Styles in this directory are loaded automatically when the plugin activates.
+@import "ui-variables";
+@import "ui-mixins";
+
+.advanced-filter {
+  // The stock tab already renders its own .container-mail-rules; ours reuses
+  // that class for identical horizontal alignment, and only needs to close the
+  // vertical gap to sit directly under the stock "Process entire inbox" note.
+  section {
+    padding-top: 0;
+  }
+
+  h6 {
+    color: @text-color-very-subtle;
+    margin-bottom: 10px;
+  }
+
+  .advanced-filter-controls {
+    display: flex;
+    align-items: center;
+    max-width: 600px;
+
+    select {
+      margin: 0 10px 0 0;
+      min-width: 200px;
+    }
+  }
+
+  .advanced-filter-status {
+    display: flex;
+    align-items: baseline;
+    max-width: 600px;
+    margin-top: 10px;
+  }
+
+  .advanced-filter-note {
+    margin-top: 10px;
+    max-width: 600px;
+    color: @text-color-very-subtle;
+  }
+}
