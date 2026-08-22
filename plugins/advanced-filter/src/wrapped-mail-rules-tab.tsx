@@ -33,7 +33,13 @@ export default function wrapMailRulesTab(OriginalTab: any) {
     _onDOMChange = (event: Event) => {
       const target = event.target as HTMLSelectElement;
       if (target && target.id === 'mail-rules-account' && target.value) {
-        this.setState({ accountId: target.value });
+        const accountId = target.value;
+        // This native listener fires BEFORE React's delegated onChange. A
+        // synchronous setState here re-renders the stock tab, and its
+        // controlled <select> resets the DOM back to the old account before
+        // the stock handler reads event.target.value — the selection snaps
+        // back. Defer a tick so the stock tab commits the change first.
+        window.setTimeout(() => this.setState({ accountId }), 0);
       }
     };
 
