@@ -73,10 +73,19 @@ jobs:
           unzip -l "$ZIP"
           echo "zip=$ZIP" >> "$GITHUB_OUTPUT"
 
-      - name: Create GitHub release
+      - name: Create or update GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" "${{ steps.pack.outputs.zip }}" \
-            --title "${{ steps.parse.outputs.plugin }} v${{ steps.parse.outputs.version }}" \
-            --generate-notes
+          TITLE="${{ steps.parse.outputs.plugin }} v${{ steps.parse.outputs.version }}"
+          ZIP="${{ steps.pack.outputs.zip }}"
+
+          # A release may already exist for this tag (e.g. created manually in
+          # the GitHub UI, which also pushes the tag and triggers this
+          # workflow) — attach the asset to it instead of failing.
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "$ZIP" --clobber
+            gh release edit "$GITHUB_REF_NAME" --title "$TITLE"
+          else
+            gh release create "$GITHUB_REF_NAME" "$ZIP" --title "$TITLE" --generate-notes
+          fi
