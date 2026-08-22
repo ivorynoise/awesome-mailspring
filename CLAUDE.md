@@ -8,6 +8,7 @@ Mailspring-specific rules that aren't obvious from the code.
 
 ```
 plugins/<name>/          one self-contained Mailspring plugin per directory
+├── README.md            what it does, how it works, caveats — linked from root README
 ├── package.json         main: ./lib/main · engines.mailspring · windowTypes
 ├── tsconfig.json        compiles src/ → lib/ (ES2017 + CommonJS + React JSX)
 ├── src/                 TypeScript source (entry exports activate/deactivate)
@@ -79,7 +80,8 @@ from memory — verify in source, and extend the plugin's
 - **New plugin**: copy `plugins/hello-mailspring`, rename (no spaces — plugin
   names are node-module names), update `package.json` name/description,
   rename the styles file. Commit its `package-lock.json` — CI's `npm ci` and
-  cache depend on it.
+  cache depend on it. Rewrite its `README.md` (what it does / how it works /
+  caveats) and add the plugin to the root README's Plugins table.
 - **Develop**: `npm run watch` in the plugin + `scripts/link.sh <name>`;
   run Mailspring via `Developer → Run with debug flags...` and reload
   (`View → Reload`) to pick up changes.

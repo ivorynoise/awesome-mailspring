@@ -53,6 +53,8 @@ Then in the new directory:
 2. Rename `styles/hello-mailspring.less`
 3. Write your code in `src/` — the entry point must export `activate()` and
    `deactivate()` (see `src/main.tsx`)
+4. Rewrite `README.md` for the new plugin and add a row to the
+   [Plugins](#plugins) table below
 
 Mailspring loads `main` from `package.json` (`./lib/main`), which is the
 compiled output of `src/` — always build before linking.
@@ -130,5 +132,7 @@ them as needed.
 
 | Plugin | Status | Description |
 |---|---|---|
-| `hello-mailspring` | template | Sender-domain color bar in the message sidebar (from the official guide) |
-| `advanced-filter` | working | Run an account's mail rules on any mailbox: adds a folder picker + "Process mailbox" button below Preferences → Mail Rules (defaults to All Mail, falls back to Inbox) |
+| [`hello-mailspring`](plugins/hello-mailspring/README.md) | template | Sender-domain color bar in the message sidebar (from the official guide) |
+| [`advanced-filter`](plugins/advanced-filter/README.md) | working | Run an account's mail rules on any mailbox: adds a folder picker + "Process mailbox" button below Preferences → Mail Rules (defaults to All Mail, falls back to Inbox) |
+
+Each plugin's README covers what it does, how it works, and its caveats.
