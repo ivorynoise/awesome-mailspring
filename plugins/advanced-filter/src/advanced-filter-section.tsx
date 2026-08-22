@@ -6,6 +6,7 @@ import {
 } from 'mailspring-exports';
 
 import FolderRulesRunner, { FolderRunState } from './folder-rules-runner';
+import { exportAllRules, importRules } from './rules-io';
 
 // Standard mailboxes first (All Mail on top), then everything else A→Z.
 const ROLE_ORDER: { [role: string]: number } = {
@@ -26,12 +27,13 @@ interface Props {
 interface State {
   chosenCategoryId: string | null;
   chosenForAccountId: string | null;
+  ioStatus: string | null;
 }
 
 export default class AdvancedFilterSection extends React.Component<Props, State> {
   static displayName = 'AdvancedFilterSection';
 
-  state: State = { chosenCategoryId: null, chosenForAccountId: null };
+  state: State = { chosenCategoryId: null, chosenForAccountId: null, ioStatus: null };
 
   _unsubscribers: Array<() => void> = [];
 
@@ -104,6 +106,28 @@ export default class AdvancedFilterSection extends React.Component<Props, State>
       return;
     }
     FolderRulesRunner.start(this.props.accountId!, category);
+  };
+
+  _onExport = async () => {
+    const status = await exportAllRules();
+    if (status) {
+      this.setState({ ioStatus: status });
+    }
+  };
+
+  _onImport = async () => {
+    const summary = await importRules();
+    if (!summary) {
+      return; // cancelled or invalid file (already reported via dialog)
+    }
+    const parts = [
+      `Imported ${summary.imported} rule${summary.imported === 1 ? '' : 's'}`,
+      `skipped ${summary.duplicates} duplicate${summary.duplicates === 1 ? '' : 's'}`,
+    ];
+    for (const reason of summary.skipped) {
+      parts.push(`skipped ${reason}`);
+    }
+    this.setState({ ioStatus: parts.join(' · ') });
   };
 
   _renderStatus(run: FolderRunState | null) {
@@ -185,6 +209,32 @@ export default class AdvancedFilterSection extends React.Component<Props, State>
             Applies this account&rsquo;s enabled mail rules to every message in the selected
             mailbox — All Mail by default when the account has one, otherwise the inbox.
             Large mailboxes may take a while.
+          </p>
+          <div className="advanced-filter-io">
+            <button
+              className="btn"
+              disabled={MailRulesStore.rules().length === 0}
+              onClick={this._onExport}
+            >
+              Export all rules…
+            </button>
+            <button className="btn" onClick={this._onImport}>
+              Import rules…
+            </button>
+          </div>
+          {this.state.ioStatus ? (
+            <div className="advanced-filter-io-status">
+              <div>{this.state.ioStatus}</div>
+              <div style={{ flex: 1 }} />
+              <button className="btn btn-sm" onClick={() => this.setState({ ioStatus: null })}>
+                Dismiss
+              </button>
+            </div>
+          ) : null}
+          <p className="advanced-filter-note">
+            Export saves every account&rsquo;s rules to a JSON file. Import adds rules from a
+            file, matching accounts by email address and folders by path, and skips rules
+            that would duplicate an existing rule&rsquo;s behavior.
           </p>
         </section>
       </div>

@@ -357,5 +357,11 @@ declare module 'mailspring-exports'
 declare const AppEnv:
 {
 	showErrorDialog(message: string | { title: string; message: string }): void;
+	showSaveDialog(options: any, callback: (path: string) => void): void;
+	showOpenDialog(options: any, callback: (paths: string[]) => void): void;
 	isMainWindow(): boolean;
 } & Record<string, any>;
+
+// Node's require, available to plugins (Mailspring windows run with node
+// integration). Used for built-ins like 'fs'.
+declare function require(moduleName: string): any;

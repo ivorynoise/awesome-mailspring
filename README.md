@@ -131,4 +131,4 @@ them as needed.
 | Plugin | Status | Description |
 |---|---|---|
 | `hello-mailspring` | template | Sender-domain color bar in the message sidebar (from the official guide) |
-| `advanced-filter` | working | Run an account's mail rules on any mailbox: adds a folder picker + "Process mailbox" button below Preferences → Mail Rules (defaults to All Mail, falls back to Inbox) |
+| `advanced-filter` | working | Run an account's mail rules on any mailbox: adds a folder picker + "Process mailbox" button below Preferences → Mail Rules (defaults to All Mail, falls back to Inbox). Also exports/imports all rules as portable JSON with behavior-based dedup on import |
